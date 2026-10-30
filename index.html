@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#183c35"><meta name="description" content="Offline-first GPS field log">
+<link rel="manifest" href="manifest.json"><link rel="icon" href="icon-192.png"><link rel="stylesheet" href="style.css">
+<title>Field Log</title></head><body>
+<header><div><h1>Field Log</h1><p id="status">Starting…</p></div><button id="install" hidden>Install</button></header>
+<main>
+<section id="record">
+<label for="caption">Caption <small>(optional)</small></label>
+<textarea id="caption" rows="3" placeholder="What would you like to remember about this spot?"></textarea>
+<button id="log" class="primary"><b>＋</b><span id="log-label">LOG POSITION</span></button>
+<p id="message" role="status">Press the button to record your current GPS position.</p>
+<div id="last" class="card" hidden><small>LAST RECORDED POSITION</small><div id="last-details"></div></div>
+</section>
+<section id="log-screen" hidden>
+<div class="heading"><div><h2>Your log</h2><small id="count">0 entries</small></div><button id="back">Back</button></div>
+<div class="exports"><button id="txt">Export TXT</button><button id="csv">Export CSV</button></div>
+<div id="entries"></div><button id="clear" class="danger">Clear entire log…</button>
+</section></main>
+<nav><button id="nav-record" class="selected">＋ Record</button><button id="nav-log">☷ View log <span id="nav-count">0</span></button></nav>
+<script src="database.js"></script><script src="app.js"></script></body></html>
