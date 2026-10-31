@@ -55,6 +55,8 @@
 
                 if (action === "add") {
                     request = store.add(value);
+                } else if (action === "update") {
+                    request = store.put(value);
                 } else if (action === "delete") {
                     request = store.delete(value);
                 } else {
@@ -76,6 +78,10 @@
     window.FieldLogDB = {
         add: function (entry) {
             return write("add", entry);
+        },
+
+        update: function (entry) {
+            return write("update", entry);
         },
 
         remove: function (id) {

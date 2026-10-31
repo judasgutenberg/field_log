@@ -4,7 +4,7 @@
  * The first successful visit downloads the app files into a browser cache.
  * Later visits can load those files without a network connection.
  */
-var CACHE_NAME = "field-log-v1";
+var CACHE_NAME = "field-log-v2";
 
 var APP_FILES = [
     "./",

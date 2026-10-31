@@ -1,23 +1,29 @@
 /*
  * Field Log application.
  *
- * This file handles the screen, GPS capture, log display, and export.
- * database.js provides the FieldLogDB functions used to store entries.
+ * This file handles GPS capture, the screen, log display, export, and upload.
+ * database.js provides the FieldLogDB functions used for local storage.
  */
 (function () {
     "use strict";
 
-    // Short helper for finding an element by its ID.
     var $ = function (id) {
         return document.getElementById(id);
     };
 
     var rows = [];
+    var uploadInProgress = false;
+    var settingsStorageKey = "field-log-upload-settings";
 
     // Display a status or error message above the main controls.
     function message(text, isError) {
         $("message").textContent = text;
         $("message").className = isError ? "error" : "";
+    }
+
+    function uploadMessage(text, isError) {
+        $("upload-message").textContent = text;
+        $("upload-message").className = isError ? "error" : "";
     }
 
     function formatDate(timestamp) {
@@ -29,7 +35,6 @@
             entry.longitude.toFixed(6);
     }
 
-    // Keep the entry counts in the navigation and log screen up to date.
     function updateCount(number) {
         $("nav-count").textContent = number;
         $("count").textContent = number +
@@ -42,7 +47,6 @@
             (isBusy ? "GETTING GPS FIX…" : "LOG POSITION");
     }
 
-    // Show the details of the most recently recorded position.
     function showLastEntry(entry) {
         $("last").hidden = false;
         $("last-details").innerHTML = "";
@@ -59,7 +63,6 @@
         $("last-details").append(coordinates, details);
     }
 
-    // Switch between the recording screen and the saved-entry list.
     function showScreen(which) {
         var showLog = which === "log";
 
@@ -73,7 +76,6 @@
         }
     }
 
-    // Translate browser geolocation errors into useful messages.
     function locationError(error) {
         setBusy(false);
 
@@ -86,12 +88,38 @@
         message(messages[error.code] || ("GPS error: " + error.message), true);
     }
 
+    function databaseError(error) {
+        message("Local storage error: " + error.message, true);
+    }
+
+    // Count entries that have not yet received a successful server response.
+    function countPending(entries) {
+        return entries.filter(function (entry) {
+            return !entry.uploadedAt;
+        }).length;
+    }
+
+    function updateUploadButton(entries) {
+        var pending = countPending(entries);
+
+        if (uploadInProgress) {
+            return;
+        }
+
+        $("upload").disabled = pending === 0;
+        $("upload").textContent = pending
+            ? "Upload " + pending + " saved " +
+                (pending === 1 ? "position" : "positions")
+            : "All positions uploaded";
+    }
+
     // Read all saved entries and rebuild the log display.
     function refreshLog() {
         FieldLogDB.all()
             .then(function (entries) {
                 rows = entries;
                 updateCount(entries.length);
+                updateUploadButton(entries);
 
                 var container = $("entries");
                 container.innerHTML = "";
@@ -125,6 +153,14 @@
                     accuracy.textContent = "GPS accuracy ±" +
                         Math.round(entry.accuracy) + " m";
 
+                    var uploadStatus = document.createElement("div");
+                    uploadStatus.className = entry.uploadedAt
+                        ? "entry-uploaded"
+                        : "entry-pending";
+                    uploadStatus.textContent = entry.uploadedAt
+                        ? "Uploaded to server"
+                        : "Waiting to upload";
+
                     var actions = document.createElement("div");
                     actions.className = "entry-actions";
 
@@ -139,25 +175,23 @@
                     });
 
                     actions.append(deleteButton);
-                    card.append(date, coordinates, caption, accuracy, actions);
+                    card.append(
+                        date, coordinates, caption, accuracy,
+                        uploadStatus, actions
+                    );
                     container.append(card);
                 });
             })
             .catch(databaseError);
     }
 
-    function databaseError(error) {
-        message("Local storage error: " + error.message, true);
-    }
-
-    // Capture the current GPS position and save it as a new entry.
+    // Capture the current GPS position and save it locally first.
     $("log").addEventListener("click", function () {
         if (!navigator.geolocation) {
             message("This browser does not support geolocation.", true);
             return;
         }
 
-        // Browsers require a secure (HTTPS) context for geolocation.
         if (!window.isSecureContext) {
             message("GPS requires HTTPS. Open the app at its HTTPS address.", true);
             return;
@@ -187,6 +221,7 @@
                     .then(function (entries) {
                         rows = entries;
                         updateCount(entries.length);
+                        updateUploadButton(entries);
                     })
                     .catch(function (error) {
                         setBusy(false);
@@ -225,7 +260,6 @@
         }, 1000);
     }
 
-    // Give exported files a date-stamped name.
     function makeFilename(extension) {
         var today = new Date();
 
@@ -252,7 +286,6 @@
             .catch(databaseError);
     };
 
-    // Quote CSV text fields, escaping any quotes inside the value.
     function csvCell(value) {
         return '"' + String(value == null ? "" : value).replace(/"/g, '""') + '"';
     }
@@ -275,7 +308,6 @@
                     ].join(","));
                 });
 
-                // UTF-8 BOM helps spreadsheet programs recognize the file.
                 downloadFile(
                     makeFilename("csv"),
                     "\uFEFF" + lines.join("\r\n"),
@@ -283,6 +315,182 @@
                 );
             })
             .catch(databaseError);
+    };
+
+    // Load and save the two user-configurable upload settings.
+    function loadUploadSettings() {
+        var settings;
+
+        try {
+            settings = JSON.parse(localStorage.getItem(settingsStorageKey) || "{}");
+        } catch (error) {
+            settings = {};
+        }
+
+        $("upload-endpoint").value = settings.endpoint || "";
+        $("device-id").value = settings.deviceId || "";
+    }
+
+    function getUploadSettings() {
+        return {
+            endpoint: $("upload-endpoint").value.trim(),
+            deviceId: $("device-id").value.trim()
+        };
+    }
+
+    $("save-settings").onclick = function () {
+        var settings = getUploadSettings();
+
+        if (!settings.endpoint || !settings.deviceId) {
+            uploadMessage("Enter both the server endpoint and device ID.", true);
+            return;
+        }
+
+        try {
+            // Validate the URL now, so an invalid value is caught before upload.
+            new URL(settings.endpoint, window.location.href);
+            localStorage.setItem(settingsStorageKey, JSON.stringify(settings));
+            uploadMessage("Upload settings saved on this phone.");
+        } catch (error) {
+            uploadMessage("The endpoint URL is not valid.", true);
+        }
+    };
+
+    // Send one entry to server.php using its query-string interface.
+    // A successful HTTP 2xx response is treated as the server's acknowledgment.
+    function sendEntry(entry, settings) {
+        return new Promise(function (resolve, reject) {
+            var endpoint;
+
+            try {
+                endpoint = new URL(settings.endpoint, window.location.href);
+            } catch (error) {
+                reject(new Error("The server endpoint URL is not valid."));
+                return;
+            }
+
+            // The backend expects four asterisk-delimited fields in this order.
+            var data = [
+                entry.latitude,
+                entry.longitude,
+                entry.timestamp,
+                entry.caption || ""
+            ].join("*");
+
+            endpoint.searchParams.set("data", data);
+            endpoint.searchParams.set("device_id", settings.deviceId);
+
+            var request = new XMLHttpRequest();
+            request.open("GET", endpoint.toString(), true);
+            request.timeout = 30000;
+            request.setRequestHeader("Accept", "application/json, text/plain, */*");
+
+            request.onload = function () {
+                if (request.status >= 200 && request.status < 300) {
+                    resolve(request.responseText);
+                } else {
+                    reject(new Error(
+                        "Server returned HTTP " + request.status +
+                        (request.responseText ? ": " + request.responseText : "")
+                    ));
+                }
+            };
+
+            request.onerror = function () {
+                reject(new Error(
+                    "Network error. Check the connection and server CORS settings."
+                ));
+            };
+
+            request.ontimeout = function () {
+                reject(new Error("The server request timed out."));
+            };
+
+            request.send();
+        });
+    }
+
+    // Upload pending entries one at a time. Mark each only after its own
+    // successful response, so an interrupted batch can safely be retried.
+    $("upload").onclick = function () {
+        var settings = getUploadSettings();
+
+        if (!settings.endpoint || !settings.deviceId) {
+            uploadMessage("Open Upload settings and enter the endpoint and device ID.", true);
+            $("settings").open = true;
+            return;
+        }
+
+        if (!navigator.onLine) {
+            uploadMessage("This phone appears to be offline. Your entries are safe here.", true);
+            return;
+        }
+
+        try {
+            localStorage.setItem(settingsStorageKey, JSON.stringify(settings));
+        } catch (error) {
+            uploadMessage("Could not save the upload settings: " + error.message, true);
+            return;
+        }
+
+        FieldLogDB.all()
+            .then(function (entries) {
+                var pending = entries.filter(function (entry) {
+                    return !entry.uploadedAt;
+                });
+
+                if (!pending.length) {
+                    uploadMessage("There are no entries waiting to upload.");
+                    updateUploadButton(entries);
+                    return;
+                }
+
+                uploadInProgress = true;
+                $("upload").disabled = true;
+                $("upload").textContent = "Uploading…";
+
+                var completed = 0;
+                var chain = Promise.resolve();
+
+                pending.forEach(function (entry) {
+                    chain = chain.then(function () {
+                        uploadMessage(
+                            "Uploading position " + (completed + 1) +
+                            " of " + pending.length + "…"
+                        );
+
+                        return sendEntry(entry, settings).then(function () {
+                            entry.uploadedAt = new Date().toISOString();
+                            return FieldLogDB.update(entry);
+                        }).then(function () {
+                            completed++;
+                        });
+                    });
+                });
+
+                chain.then(function () {
+                    uploadInProgress = false;
+                    uploadMessage(
+                        "Uploaded " + completed + " " +
+                        (completed === 1 ? "position" : "positions") +
+                        ". Local copies have been kept."
+                    );
+                    refreshLog();
+                }).catch(function (error) {
+                    uploadInProgress = false;
+                    uploadMessage(
+                        "Uploaded " + completed + " of " + pending.length +
+                        ". The remaining entries are still waiting. " + error.message,
+                        true
+                    );
+                    refreshLog();
+                });
+            })
+            .catch(function (error) {
+                uploadInProgress = false;
+                uploadMessage("Could not read the local log: " + error.message, true);
+                refreshLog();
+            });
     };
 
     // Delete the entire log, but only after an explicit confirmation.
@@ -307,7 +515,6 @@
         showScreen("log");
     };
 
-    // Show whether the phone currently has a network connection.
     function updateConnectionStatus() {
         $("status").textContent = navigator.onLine
             ? "Ready · online"
@@ -318,7 +525,7 @@
     window.addEventListener("offline", updateConnectionStatus);
     updateConnectionStatus();
 
-    // Register the service worker so the app can work offline after setup.
+    // Register the service worker so the app shell remains available offline.
     if ("serviceWorker" in navigator && isSecureContext) {
         addEventListener("load", function () {
             navigator.serviceWorker.register("./service-worker.js")
@@ -326,7 +533,6 @@
         });
     }
 
-    // Ask the browser to preserve this site's local storage when possible.
     if (navigator.storage && navigator.storage.persist) {
         navigator.storage.persist().catch(function () {});
     }
@@ -351,11 +557,14 @@
         }
     };
 
-    // Load the saved count and most recent entry when the app starts.
+    // Load settings and the saved count / most recent entry at startup.
+    loadUploadSettings();
+
     FieldLogDB.all()
         .then(function (entries) {
             rows = entries;
             updateCount(entries.length);
+            updateUploadButton(entries);
 
             if (entries.length) {
                 showLastEntry(entries[0]);

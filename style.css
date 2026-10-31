@@ -17,3 +17,77 @@ button:not(.primary){border:1px solid var(--line);border-radius:9px;background:w
 #entries{display:flex;flex-direction:column;gap:11px}.entry-date{font-size:12px;color:var(--muted);margin-bottom:7px}.entry-caption{margin-top:8px;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.4}.entry-actions{text-align:right;margin-top:8px}.entry-actions button{border:0!important;color:#9a342b!important;background:transparent!important;font-size:13px}
 .empty{text-align:center;color:var(--muted);background:white;border:1px dashed var(--line);border-radius:12px;padding:28px 15px}.danger{width:100%;margin-top:18px;color:#9a342b!important}
 [hidden]{display:none!important}@media(min-width:600px){main{padding-top:32px}.primary{min-height:125px}}
+
+/* Upload controls and editable server settings. */
+.upload-panel {
+    background: #eaf0eb;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 13px;
+    margin: 0 0 16px;
+}
+.upload-button {
+    width: 100%;
+    background: var(--green2) !important;
+    border-color: var(--green2) !important;
+    color: white !important;
+}
+.upload-button:disabled {
+    opacity: .6;
+    cursor: wait;
+}
+#upload-message {
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.4;
+    margin: 9px 2px 0;
+}
+#upload-message.error {
+    color: #a02e25;
+}
+.settings {
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 13px;
+    margin-bottom: 16px;
+}
+.settings summary {
+    cursor: pointer;
+    font-weight: 700;
+}
+.settings label {
+    margin-top: 13px;
+    font-size: 13px;
+}
+.settings input {
+    display: block;
+    width: 100%;
+    min-height: 43px;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    padding: 9px 10px;
+    background: white;
+    color: var(--ink);
+    font: inherit;
+    font-size: 16px;
+}
+#save-settings {
+    width: 100%;
+    margin-top: 13px;
+}
+.settings > small {
+    display: block;
+    margin-top: 9px;
+    line-height: 1.4;
+}
+.entry-uploaded {
+    color: var(--green2);
+    font-size: 12px;
+    margin-top: 5px;
+}
+.entry-pending {
+    color: #8a5a16;
+    font-size: 12px;
+    margin-top: 5px;
+}
