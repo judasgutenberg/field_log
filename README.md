@@ -19,7 +19,7 @@ INSTALLATION
 
 HTTPS IS REQUIRED
 Browsers require HTTPS for geolocation and service workers. Opening index.html
-from a file manager will not work properly.
+from a file manager will not work properly.  (This sucks, of course.  It's my one-off app and I should be able to do with it what I like.)
 
 FEATURES
 - Button-triggered GPS capture, timestamp, accuracy, and optional caption.
