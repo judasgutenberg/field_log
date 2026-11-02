@@ -28,7 +28,7 @@ FEATURES
 - Export plain text or CSV.
 - Optional manual upload of saved entries to a PHP endpoint.
 - Offline app shell via service worker.
-- No automatic uploads or background tracking.
+- No automatic uploads or background tracking, though that could change.
 
 CONFIGURING UPLOAD
 1. Open View log, then expand Upload settings.
