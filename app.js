@@ -206,6 +206,7 @@
                     timestamp: new Date().toISOString(),
                     latitude: position.coords.latitude,
                     longitude: position.coords.longitude,
+                    elevation: position.coords.elevation,
                     accuracy: position.coords.accuracy,
                     caption: $("caption").value.trim()
                 };
@@ -215,7 +216,7 @@
                         $("caption").value = "";
                         showLastEntry(entry);
                         setBusy(false);
-                        message("Position saved on this phone.");
+                        message("Position saved on this device.");
                         return FieldLogDB.all();
                     })
                     .then(function (entries) {
@@ -360,6 +361,7 @@
     // A successful HTTP 2xx response is treated as the server's acknowledgment.
     function sendEntry(entry, settings) {
         return new Promise(function (resolve, reject) {
+            console.log("sending data");
             var endpoint;
 
             try {
@@ -373,12 +375,15 @@
             var data = [
                 entry.latitude,
                 entry.longitude,
+                entry.elevation,
+                entry.accuracy,
                 entry.timestamp,
-                entry.caption || ""
+                entry.caption.replace(/[＊*|]/g, "") || "" //filtering out delimeters
             ].join("*");
 
             endpoint.searchParams.set("data", data);
             endpoint.searchParams.set("device_id", settings.deviceId);
+            endpoint.searchParams.set("mode", "logGpsData");
 
             var request = new XMLHttpRequest();
             request.open("GET", endpoint.toString(), true);
@@ -387,7 +392,18 @@
 
             request.onload = function () {
                 if (request.status >= 200 && request.status < 300) {
-                    resolve(request.responseText);
+                    if(request.responseText) {
+                        let returnData = JSON.parse(request.responseText);
+                        console.log(returnData);
+                        if(returnData.result == "save"){
+                            resolve(request.responseText);
+                        } else {
+                            reject(new Error(returnData.error));
+                        }
+                        
+                    } else {
+                        reject(new Error("Server returned  no response"));
+                    }
                 } else {
                     reject(new Error(
                         "Server returned HTTP " + request.status +
