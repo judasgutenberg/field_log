@@ -41,7 +41,8 @@ For each entry, Field Log makes one GET request to the configured endpoint with
 these query-string parameters:
 
     device_id=<configured device ID>
-    data=<latitude>*<longitude>*<timestamp>*<caption>
+    mode=logGpsData
+    data=<latitude>*<longitude>*<elevation>*<accuracy>*<timestamp>*<caption>
 
 The timestamp is sent in ISO 8601 UTC form, as stored by the app. URL encoding
 is handled by the browser. A successful HTTP response (status 200-299) is
