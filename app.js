@@ -330,20 +330,22 @@
 
         $("upload-endpoint").value = settings.endpoint || "";
         $("device-id").value = settings.deviceId || "";
+        $("storage-password").value = settings.storagePassword || "";
     }
 
     function getUploadSettings() {
         return {
             endpoint: $("upload-endpoint").value.trim(),
-            deviceId: $("device-id").value.trim()
+            deviceId: $("device-id").value.trim(),
+            storagePassword: $("storage-password").value.trim()
         };
     }
 
     $("save-settings").onclick = function () {
         var settings = getUploadSettings();
 
-        if (!settings.endpoint || !settings.deviceId) {
-            uploadMessage("Enter both the server endpoint and device ID.", true);
+        if (!settings.endpoint || !settings.deviceId || !settings.storagePassword) {
+            uploadMessage("Enter the server endpoint, device ID, and a storage password.", true);
             return;
         }
 
@@ -383,6 +385,7 @@
 
             endpoint.searchParams.set("data", data);
             endpoint.searchParams.set("device_id", settings.deviceId);
+            endpoint.searchParams.set("storage_password", settings.storagePassword);
             endpoint.searchParams.set("mode", "logGpsData");
 
             var request = new XMLHttpRequest();
@@ -431,8 +434,8 @@
     $("upload").onclick = function () {
         var settings = getUploadSettings();
 
-        if (!settings.endpoint || !settings.deviceId) {
-            uploadMessage("Open Upload settings and enter the endpoint and device ID.", true);
+        if (!settings.endpoint || !settings.deviceId || !settings.storagePassword) {
+            uploadMessage("Open Upload settings and enter the endpoint, device ID, and storage password.", true);
             $("settings").open = true;
             return;
         }

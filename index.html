@@ -13,7 +13,7 @@
 <body>
     <header>
         <div>
-            <h1>Field Log V2</h1>
+            <h1>Field Log V2.2</h1>
             <p id="status">Starting…</p>
         </div>
         <button id="install" hidden>Install</button>
@@ -67,6 +67,9 @@
                 <label for="device-id">Device ID</label>
                 <input id="device-id" type="text" placeholder="Your FieldLog device ID"
                     autocomplete="off">
+                <label for="storage-password">Storage Password</label>
+                <input id="storage-password" type="text" placeholder="Storage password for your tenant"
+                    autocomplete="off">
                 <button id="save-settings">Save upload settings</button>
                 <small>These settings are saved locally in this browser.</small>
             </details>
@@ -81,7 +84,7 @@
         <button id="nav-log">☷ Settings/View log <span id="nav-count">0</span></button>
     </nav>
 
-    <script src="database.js"></script>
-    <script src="app.js?v=12"></script>
+    <script src="database.js?v=2.2"></script>
+    <script src="app.js?v=2.2"></script>
 </body>
 </html>
