@@ -6,6 +6,8 @@ storage work without a server-side application. An optional upload button sends
 saved entries to your own PHP endpoint when the phone has a connection.
 
 I built this app because Google Maps makes saving and sharing pins into a clunky process that obscures the latitude and longitude values, acting as if such numbers are too technical for the intended audience.  It also likes to display such data as degrees-minutes-seconds instead of decimal degrees, making it difficult to place these on a map later.  Also, Google Maps doesn't work very well when there is no cell signal.
+
+
 INSTALLATION
 1. Copy the entire fieldlog folder to an HTTPS web host, preserving filenames.
    Example: https://your-domain.example/fieldlog/
