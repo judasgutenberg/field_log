@@ -1,4 +1,4 @@
-FIELD LOG v1.1
+FIELD LOG v2.3
 ==============
 
 This is a static, offline-first Progressive Web App. GPS logging and local
@@ -44,6 +44,7 @@ these query-string parameters:
 
     device_id=<configured device ID>
     mode=logGpsData
+    storage_password=<a secret stored with the tenant in the backend database>
     data=<latitude>*<longitude>*<elevation>*<accuracy>*<timestamp>*<caption>
 
 The timestamp is sent in ISO 8601 UTC form, as stored by the app. URL encoding
