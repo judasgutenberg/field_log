@@ -432,6 +432,8 @@
     // Upload pending entries one at a time. Mark each only after its own
     // successful response, so an interrupted batch can safely be retried.
     $("upload").onclick = function () {
+        var uploadAll = $("uploadall").value == 1; //useful for re-uploading if you purge your backend database
+        console.log("upload all:" + uploadAll);
         var settings = getUploadSettings();
 
         if (!settings.endpoint || !settings.deviceId || !settings.storagePassword) {
@@ -455,7 +457,7 @@
         FieldLogDB.all()
             .then(function (entries) {
                 var pending = entries.filter(function (entry) {
-                    return !entry.uploadedAt;
+                    return !entry.uploadedAt || uploadAll;
                 });
 
                 if (!pending.length) {

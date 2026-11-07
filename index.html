@@ -13,7 +13,7 @@
 <body>
     <header>
         <div>
-            <h1>Field Log V2.2</h1>
+            <h1>Field Log V2.3</h1>
             <p id="status">Starting…</p>
         </div>
         <button id="install" hidden>Install</button>
@@ -53,7 +53,9 @@
             </div>
 
             <div class="upload-panel">
-                <button id="upload" class="upload-button">Upload saved positions</button>
+                
+                <button id="upload" class="upload-button">Upload pending saved positions</button>
+                <input type="checkbox" id="uploadall" value="1"> also reupload past uploaded positions
                 <p id="upload-message" role="status">
                     Entries stay on this phone. Upload sends them to your server.
                 </p>
@@ -84,7 +86,7 @@
         <button id="nav-log">☷ Settings/View log <span id="nav-count">0</span></button>
     </nav>
 
-    <script src="database.js?v=2.2"></script>
-    <script src="app.js?v=2.2"></script>
+    <script src="database.js?v=2.3"></script>
+    <script src="app.js?v=2.3"></script>
 </body>
 </html>
