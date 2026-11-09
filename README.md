@@ -10,7 +10,7 @@ I built this app because Google Maps makes saving and sharing pins into a clunky
 
 INSTALLATION
 1. Copy the entire fieldlog folder to an HTTPS web host, preserving filenames.
-   Example: https://your-domain.example/fieldlog/
+   Example: https://your-domain.example/fieldlog/. The backend I am using is the one for this:  https://github.com/judasgutenberg/Esp8266_RemoteControl
 2. Visit that HTTPS address in Chrome on your Android phone while online.
 3. Allow location permission.
 4. Wait for the app to load, then use Chrome's menu > Install app (or Add to
