@@ -75,7 +75,7 @@ GPS
 Satellite GPS does not require cellular service. Initial fixes can take longer
 after the phone has been off or when the sky view is obstructed. The phone may
 also use Wi-Fi or other signals when available. The reported accuracy is an
-estimate, not a guarantee.
+estimate, not a guarantee.  If not using GPS, the location can be off by a huge distance, because it may use the location of the internet service provider.
 
 UPDATING
 The service worker cache name is field-log-v2. Change it again (for example, to
