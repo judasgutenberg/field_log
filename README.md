@@ -70,7 +70,7 @@ these fields or in browser JavaScript.
 DATA
 The log stays in this browser on this device. Export TXT or CSV periodically.
 Clearing browser site data, uninstalling/resetting the browser, or device cleanup
-can erase local data. Persistent storage is requested but not guaranteed.
+can erase local data. Persistent storage is kindly requested but not guaranteed.
 
 GPS
 Satellite GPS does not require cellular service. Initial fixes can take longer
