@@ -55,7 +55,8 @@ when it has not successfully saved the entry.
 Entries are sent one at a time. After each successful response, that entry is
 marked as uploaded in the local database. If a request fails, the upload stops;
 entries not yet acknowledged remain pending for the next attempt. The local
-records are never removed by uploading.
+records are never removed by uploading.  It is possible to re-upload local records
+in the case of an unwanted purge of backend data.  There is a checkbox in the UI to do this.
 
 If the endpoint is on a different domain from the FieldLog app, the PHP server
 must send an appropriate Access-Control-Allow-Origin response header allowing
